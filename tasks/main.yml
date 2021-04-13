@@ -1,0 +1,12 @@
+---
+
+## Install Jitsi docker
+- name: Install Jitsi docker
+  template:
+    src: jitsi.yaml.j2
+    dest: /home/docker/jitsi.yaml
+    owner: root
+    group: root
+    mode: '0400'
+  notify:
+    - start jitsi docker

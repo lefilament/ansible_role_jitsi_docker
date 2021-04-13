@@ -1,0 +1,144 @@
+version: '3'
+
+services:
+    # Frontend
+    web:
+        container_name: jitsi
+        environment:
+            ENABLE_HTTP_REDIRECT: 0
+            ENABLE_XMPP_WEBSOCKET: 0
+            DISABLE_HTTPS: 1
+            PUBLIC_URL: "https://{{ jitsi_url }}:443"
+            TZ: "UTC"
+            ENABLE_IPV6: 0
+            JICOFO_AUTH_USER: "focus"
+            XMPP_AUTH_DOMAIN: "auth.meet.jitsi"
+            XMPP_BOSH_URL_BASE: "http://xmpp.meet.jitsi:5280"
+            XMPP_DOMAIN: "meet.jitsi"
+            XMPP_GUEST_DOMAIN: "guest.meet.jitsi"
+            XMPP_MUC_DOMAIN: "muc.meet.jitsi"
+            XMPP_RECORDER_DOMAIN: "recorder.meet.jitsi"
+        image: jitsi/web:latest
+        labels:
+            traefik.enable: "true"
+            traefik.http.routers.jitsi.rule: "Host(`{{ jitsi_url }}`)"
+            traefik.http.routers.jitsi.service: "jitsi"
+            traefik.http.services.jitsi.loadbalancer.server.port: "80"
+        networks:
+            meet.jitsi:
+                aliases:
+                    - meet.jitsi
+            inverseproxy_shared:
+        restart: unless-stopped
+        volumes:
+            - jitsi_config:/config:Z
+            - jitsi_transcripts:/usr/share/jitsi-meet/transcripts:Z
+
+
+    # XMPP server
+    prosody:
+        container_name: jitsi_xmpp
+        environment:
+            ENABLE_XMPP_WEBSOCKET: 0
+            XMPP_AUTH_DOMAIN: "auth.meet.jitsi"
+            XMPP_DOMAIN: "meet.jitsi"
+            XMPP_GUEST_DOMAIN: "guest.meet.jitsi"
+            XMPP_INTERNAL_MUC_DOMAIN: "internal-muc.meet.jitsi"
+            XMPP_MUC_DOMAIN: "muc.meet.jitsi"
+            XMPP_RECORDER_DOMAIN: "recorder.meet.jitsi"
+            XMPP_SERVER: "xmpp.meet.jitsi"
+            JICOFO_COMPONENT_SECRET: "{{ jibri_jicofo_comp_secret }}"
+            JICOFO_AUTH_USER: "focus"
+            JICOFO_AUTH_PASSWORD: "{{ jibri_jicofo_auth_pass }}"
+            JVB_AUTH_USER: "jvb"
+            JVB_AUTH_PASSWORD: "{{ jitsi_jvb_auth_pass }}"
+            PUBLIC_URL: "https://{{ jitsi_url }}:443"
+            TZ: "UTC"
+        expose:
+            - "5222"
+            - "5347"
+            - "5280"
+        image: jitsi/prosody:latest
+        networks:
+            meet.jitsi:
+                aliases:
+                    - xmpp.meet.jitsi
+        restart: unless-stopped
+        volumes:
+            - jitsi_prosody_config:/config:Z
+            - jitsi_prosody_plugins:/prosody-plugins-custom:Z
+
+    # Focus component
+    jicofo:
+        container_name: jitsi_focus
+        depends_on:
+            - prosody
+        environment:
+            JICOFO_COMPONENT_SECRET: "{{ jibri_jicofo_comp_secret }}"
+            JICOFO_AUTH_USER: "focus"
+            JICOFO_AUTH_PASSWORD: "{{ jibri_jicofo_auth_pass }}"
+            JVB_BREWERY_MUC: "jvbbrewery"
+            TZ: "UTC"
+            XMPP_AUTH_DOMAIN: "auth.meet.jitsi"
+            XMPP_DOMAIN: "meet.jitsi"
+            XMPP_INTERNAL_MUC_DOMAIN: "internal-muc.meet.jitsi"
+            XMPP_MUC_DOMAIN: "muc.meet.jitsi"
+            XMPP_SERVER: "xmpp.meet.jitsi"
+        image: jitsi/jicofo:latest
+        networks:
+            meet.jitsi:
+        restart: unless-stopped
+        volumes:
+            - jitsi_jicofo:/config:Z
+
+    # Video bridge
+    jvb:
+        container_name: jitsi_videobridge
+        depends_on:
+            - prosody
+        environment:
+            DOCKER_HOST_ADDRESS: "{{ ansible_host }}"
+            XMPP_AUTH_DOMAIN: "auth.meet.jitsi"
+            XMPP_INTERNAL_MUC_DOMAIN: "internal-muc.meet.jitsi"
+            XMPP_SERVER: "xmpp.meet.jitsi"
+            JVB_AUTH_USER: "jvb"
+            JVB_AUTH_PASSWORD: "{{ jitsi_jvb_auth_pass }}"
+            JVB_BREWERY_MUC: "jvbbrewery"
+            JVB_PORT: 10000
+            JVB_TCP_HARVESTER_DISABLED: "true"
+            JVB_TCP_PORT: 4443
+            JVB_TCP_MAPPED_PORT: 4443
+            JVB_STUN_SERVERS: "meet-jit-si-turnrelay.jitsi.net:443"
+            PUBLIC_URL: "https://{{ jitsi_url }}:443"
+            TZ: "UTC"
+        image: jitsi/jvb:latest
+        labels:
+            traefik.udp.routers.jvb.entrypoints: video
+            traefik.udp.routers.jvb.service: jvb
+            traefik.udp.services.jvb.loadbalancer.server.port: 10000
+        networks:
+            meet.jitsi:
+                aliases:
+                    - jvb.meet.jitsi
+        ports:
+            - '10000:10000/udp'
+            - '4443:4443'
+        restart: unless-stopped
+        volumes:
+            - jitsi_jvb:/config:Z
+
+# Custom network so all services can communicate using a FQDN
+networks:
+    meet.jitsi:
+        driver_opts:
+            encrypted: 1
+    inverseproxy_shared:
+        external: true
+
+volumes:
+    jitsi_config:
+    jitsi_transcripts:
+    jitsi_prosody_config:
+    jitsi_prosody_plugins:
+    jitsi_jicofo:
+    jitsi_jvb:
