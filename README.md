@@ -1,46 +1,60 @@
-# Ansible role to deploy Jitsi server docker
+docker_jitsi
+============
 
-[![](https://img.shields.io/badge/licence-AGPL--3-blue.svg)](http://www.gnu.org/licenses/agpl "License: AGPL-3")
+This role deploys Jitsi components in Docker stack based on [Jitsi docker-compose](https://github.com/jitsi/docker-jitsi-meet/blob/master/examples/traefik-v2/docker-compose.yml).
+The main repo for this role is on [Le Filament GitLab](https://sources.le-filament.com/lefilament/ansible-roles/docker_drawio.git)
 
-This role allows you to deploy Jitsi docker stack based on [Jitsi docker-compose](https://github.com/jitsi/docker-jitsi-meet/blob/master/examples/traefik-v2/docker-compose.yml).
+Requirements
+------------
 
-Prior to running this role, you would need to have docker installed on your server and a traefik proxy (which is the purpose of [this role](https://github.com/lefilament/ansible_role_docker_server))
+None
 
-In order to use this role, you would need to define the following variables for your server (in hostvars for instance) - Only the names of the variables are provided below (not the values) for these used by this role to properly configure everything, you may copy this file directly in hostvars and set the variable although we could only encourage you to use an Ansible vault and refer vault variables from there:
+Role Variables
+--------------
 
-```json
-## Ansible configuration for connecting to remote host
-# IP address of server
-ansible_host: 
-# User to be used on server (to which Ansible server public key has been provided)
-ansible_user: 
-# Encryped password (for elevating rights / sudo)
-ansible_become_pass: 
-# Server SSHD port
-ansible_port: 
-
-
-## Jitsi Configuration
-# Jitsi URL
-jitsi_url: 
-# Jitsi pad URL
-jitsi_pad_url: 
-# Jitsi internal secrets
-jibri_jicofo_comp_secret: 
-jibri_jicofo_auth_pass: 
-jitsi_jvb_auth_pass: 
-
-```
-
-# Credits
-
-## Contributors
-
-* Remi Cazenave <remi-filament>
+Variables from default directory :
+* jitsi_url: Jitsi URL for accessing the service
+* jitsi_pad_url: Etherpad URL (external URL)
+* jitsi_pad_internal_url: Etherpad internal URL (with protocol in front and port as needed, by default http://etherpad:9001)
+* Jitsi inter-components communication passwords :
+  * jibri_jicofo_comp_secret
+  * jibri_jicofo_auth_pass
+  * jitsi_jvb_auth_pass
 
 
-## Maintainer
+Dependencies
+------------
 
-[![](https://le-filament.com/img/logo-lefilament.png)](https://le-filament.com "Le Filament")
+This role requires the following Ansible collection :
+* community.docker
 
-This role is maintained by Le Filament
+This Docker role supposes that Traefik is deployed as an inverseproxy in front of the deployed Dockers.
+The following role is used by Le Filament for deploying Traefik : docker_server (https://sources.le-filament.com/lefilament/ansible-roles/docker_server)
+
+This role may use an Etherpad deployed instance (https://sources.le-filament.com/lefilament/ansible-roles/docker_etherpad)
+
+Example Playbook
+----------------
+
+Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+
+    - hosts: servers
+      roles:
+         - { role: docker_jitsi }
+      vars:
+         - { jitsi_url: "jitsi.example.org" }
+         - { jitsi_pad_url: "pad.le-filament.com" }
+         - { jitsi_pad_internal_url: "http://etherpad:9001" }
+         - { jibri_jicofo_comp_secret: "veryUnsecurePassToBeModified" }
+         - { jibri_jicofo_auth_pass: "veryUnsecurePassToBeModified" }
+         - { jitsi_jvb_auth_pass: "veryUnsecurePassToBeModified" }
+
+License
+-------
+
+AGPL-3
+
+Author Information
+------------------
+
+Le Filament (https://le-filament.com)

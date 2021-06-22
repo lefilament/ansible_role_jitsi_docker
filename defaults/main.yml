@@ -1,0 +1,10 @@
+---
+## Jitsi URL
+jitsi_url: "jitsi.example.org"
+## Jitsi pad URL
+jitsi_pad_url: "pad.le-filament.com"
+jitsi_pad_internal_url: "http://etherpad:9001"
+## Jitsi internal secrets
+jibri_jicofo_comp_secret: "veryUnsecurePassToBeModified"
+jibri_jicofo_auth_pass: "veryUnsecurePassToBeModified"
+jitsi_jvb_auth_pass: "veryUnsecurePassToBeModified"

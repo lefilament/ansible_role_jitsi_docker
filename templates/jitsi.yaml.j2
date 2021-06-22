@@ -11,6 +11,8 @@ services:
             PUBLIC_URL: "https://{{ jitsi_url }}:443"
             TZ: "UTC"
             ENABLE_IPV6: 0
+            ETHERPAD_PUBLIC_URL: "https://{{ jitsi_pad_url }}"
+            ETHERPAD_URL_BASE: "{{ jitsi_pad_internal_url }}"
             JICOFO_AUTH_USER: "focus"
             XMPP_AUTH_DOMAIN: "auth.meet.jitsi"
             XMPP_BOSH_URL_BASE: "http://xmpp.meet.jitsi:5280"
