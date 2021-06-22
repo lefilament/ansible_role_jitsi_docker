@@ -2,7 +2,7 @@ docker_jitsi
 ============
 
 This role deploys Jitsi components in Docker stack based on [Jitsi docker-compose](https://github.com/jitsi/docker-jitsi-meet/blob/master/examples/traefik-v2/docker-compose.yml).
-The main repo for this role is on [Le Filament GitLab](https://sources.le-filament.com/lefilament/ansible-roles/docker_drawio.git)
+The main repo for this role is on [Le Filament GitLab](https://sources.le-filament.com/lefilament/ansible-roles/docker_jitsi.git)
 
 Requirements
 ------------
