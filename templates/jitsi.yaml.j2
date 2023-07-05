@@ -20,7 +20,7 @@ services:
             XMPP_GUEST_DOMAIN: "guest.meet.jitsi"
             XMPP_MUC_DOMAIN: "muc.meet.jitsi"
             XMPP_RECORDER_DOMAIN: "recorder.meet.jitsi"
-        image: jitsi/web:latest
+        image: jitsi/web:stable
         labels:
             traefik.enable: "true"
             traefik.http.routers.jitsi.rule: "Host(`{{ jitsi_url }}`)"
@@ -60,7 +60,7 @@ services:
             - "5222"
             - "5347"
             - "5280"
-        image: jitsi/prosody:latest
+        image: jitsi/prosody:stable
         networks:
             meet.jitsi:
                 aliases:
@@ -86,7 +86,7 @@ services:
             XMPP_INTERNAL_MUC_DOMAIN: "internal-muc.meet.jitsi"
             XMPP_MUC_DOMAIN: "muc.meet.jitsi"
             XMPP_SERVER: "xmpp.meet.jitsi"
-        image: jitsi/jicofo:latest
+        image: jitsi/jicofo:stable
         networks:
             meet.jitsi:
         restart: unless-stopped
@@ -113,7 +113,7 @@ services:
             JVB_STUN_SERVERS: "meet-jit-si-turnrelay.jitsi.net:443"
             PUBLIC_URL: "https://{{ jitsi_url }}:443"
             TZ: "UTC"
-        image: jitsi/jvb:latest
+        image: jitsi/jvb:stable
         labels:
             traefik.udp.routers.jvb.entrypoints: video
             traefik.udp.routers.jvb.service: jvb

@@ -1,10 +1,10 @@
 ---
 
-- name: start jitsi docker
-  docker_compose:
-    project_src: /home/docker/
-    files: jitsi.yaml
-    project_name: jitsi
+- name: Start jitsi docker
+  community.docker.docker_compose:
+      project_src: /home/docker/
+      files: jitsi.yaml
+      project_name: jitsi
   async: 120
   poll: 10
   when: not ansible_check_mode
